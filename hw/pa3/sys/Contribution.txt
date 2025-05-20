@@ -1,0 +1,18 @@
+My contribution:
+    a. Implement page fault handler.
+    b. Setup inverted page table structure.
+    c. Implement SC and FIFO replace algorithms.
+    d. Write the get_frame() and victim eviction logic.
+
+Teammate 1:
+Backing Store Manager
+    a. Implement get_bs(), release_bs(), read_bs(), write_bs()
+    b. Set up backing store layout(pages 2048-4096)
+    c. Manage metadata like bs_map[](backing store map)
+
+Teammate 2:
+Process and Heap Manager
+    a. Implement vcreate() with heap mapping.
+    b. Setup heap freelist and manage vgetmen() and vfreemem().
+    c. Modify create()/procinit() as needed for VM fields.
+    d. Setup page directories and process mappings.

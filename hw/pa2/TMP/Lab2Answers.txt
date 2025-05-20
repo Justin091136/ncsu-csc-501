@@ -1,0 +1,19 @@
+CSC 501 - PA2 Extra Quesitons
+
+[Question 1]
+1. Priority Ceiling Protocol
+The Priority Ceiling Protocol (PCP) is a synchronization mechanism in real-time systems that effectively prevents priority inversion and chained blocking, 
+outperforming Priority Inheritance Protocol in many cases. Key Principles of PCP Each resource is assigned a priority ceiling, the highest priority of any
+task that may use it. A task can only acquire a resource if its priority is higher than the ceilings of all currently locked resources. If a high-priority 
+task is blocked, the task holding the resource temporarily inherits the priority ceiling to minimize delays. Once the resource is released, the task returns 
+to its original priority. Unlike priority inheritance, which may cause nested blocking, PCP limits maximum blocking time and prevents deadlocks by enforcing
+strict resource access rules, ensuring predictable task execution in real-time systems.
+(reference: https://www.geeksforgeeks.org/priority-ceiling-protocol/)
+
+
+[Question 2]
+A potential issue with this code is that it can cause writer to starve. If readers keep arriving in rapid succession, the writer might wait indefinitely and never get a chance to acquire the resource semaphore:
+- The first reader call wait(resource), preventing writers from continuing.
+- As long as there is at least one reader in the system (readcount > 0), the resource semaphore will not be released.
+- If new readers continue to call the function before the last reader exits, readcount never returns to zero, so signal(resource) is never called.
+- Thus, the writer remains stuck while waiting on wait(resource) and is starved.

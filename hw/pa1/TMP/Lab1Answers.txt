@@ -1,0 +1,155 @@
+[Question 1]
+What are the advantages and disadvantages of each of the two scheduling policies? 
+Also, give the advantages and disadvantages of the round robin scheduling policy 
+originally implemented in Xinu.
+
+===============================================================================
+
+Aging Scheduling:
+    Advantages:
+        - Ensures Fairness: 
+            By dynamically adjusting priority, this scheduling policy prevents 
+            high-priority processes from monopolizing the CPU indefinitely, 
+            ensuring that all processes get a chance to execute.
+
+        - Prevents Starvation: 
+            Aging scheduling ensures that lower-priority processes eventually 
+            get a chance to run by incrementally increasing their priority 
+            over time.
+
+    Disadvantages:
+        - Priority Inflation and Starvation Prevention Side Effects
+            When multiple processes exist simultaneously, their priorities will
+            continuously increase due to aging. Over time, many processes will 
+            reach high priority levels, making it difficult for truly high-priority 
+            processes to execute immediately.
+
+        - Processing Overhead: 
+            The system must frequently update the priority of all waiting 
+            processes, increasing CPU load, especially when handling many processes.
+
+-------------------------------------------------------------------------------
+
+Linux-Like Scheduling:
+    Advantages:
+        - Fair CPU Distribution: 
+            By using the epoch mechanism, every runnable process gets CPU time, 
+            and the time quantum is assigned based on priority, preventing 
+            processes from being starved.
+
+        - Dynamic Scheduling: 
+            Allows partial carryover of unused time slices into the next epoch, 
+            ensuring that processes that did not fully utilize their quantum are 
+            not entirely deprived of CPU time and can catch up in the next epoch, 
+            leading to better resource utilization.
+
+        - Prevents CPU Monopolization: 
+            Once a process exhausts its time quantum, it must wait for the next 
+            epoch, preventing high-priority processes from monopolizing the CPU 
+            and ensuring execution opportunities for all processes.
+
+    Disadvantages:
+        - Higher Computational Overhead: 
+            The scheduler must recalculate time quanta for all processes at the 
+            start of each epoch and determine the next process using the goodness 
+            function, adding processing overhead.
+
+        - Delayed Execution for New Processes: 
+            New processes created mid-epoch must wait for the next epoch to be 
+            scheduled, potentially delaying short-lived tasks.
+
+        - Limited Adaptability to Bursty Workloads: 
+            Since the scheduler operates on an epoch basis, it may not 
+            immediately react to sudden spikes in workload. This can lead to 
+            suboptimal CPU allocation in high-load scenarios until the next 
+            epoch begins.
+
+-------------------------------------------------------------------------------
+
+XINU Default Scheduling:
+    Advantages:
+        - Low Overhead and Fast Scheduling: 
+            The scheduler quickly selects the highest-priority process using a 
+            simple priority queue, minimizing processing overhead and making it 
+            ideal for lightweight systems.
+
+    Disadvantages:
+        - Starvation Can Occur: 
+            Since the scheduler is primarily static priority-based, if high-priority 
+            processes continuously execute, lower-priority processes may suffer 
+            from starvation.
+
+===============================================================================
+
+[Question 2]
+Describe when each of the schedulers run the NULL process.
+
+===============================================================================
+
+Aging Scheduling:
+    - In an aging-based scheduler, the NULL process runs when no other process 
+      is available to execute, meaning that all processes in the ready queue 
+      have either completed execution or are blocked.
+
+-------------------------------------------------------------------------------
+
+Linux-Like Scheduling:
+    - In Linux-like scheduling, the NULL process runs when all runnable 
+      processes in the current epoch have exhausted their time quantum and 
+      no process is available to run.
+    - When this happens, the system waits for a new epoch to begin and 
+      recalculates time quanta. If no process is runnable even after this, 
+      the scheduler continues running the NULL process until a process 
+      becomes available.
+
+-------------------------------------------------------------------------------
+
+XINU default Scheduling:
+    - The NULL process runs when no other process 
+      is available to execute, meaning that all processes in the ready queue 
+      have either completed execution or are blocked.
+
+===============================================================================
+
+[Question 3]
+Give two suggestions on how the above-mentioned aging-based scheduler could be 
+changed to attain better fairness while keeping the fundamental point of 
+incrementing the priority the same.
+
+===============================================================================
+
+1. Setting an Upper Bound for Aging:
+    - Aging-based scheduling can suffer from priority inflation, where all 
+      processes eventually reach similar high priority levels, making the system 
+      behave like a First-Come, First-Served (FCFS) scheduler.
+    - To prevent this while maintaining fairness, a priority ceiling can be 
+      introduced. Under this approach, a process’s priority still increases over 
+      time, but it cannot exceed a predefined limit.
+    - For example, in a system where priority values range from 1 to 100, a 
+      process that starts at priority 10 may gradually increase due to aging but 
+      will never surpass 80.
+    - This ensures that aging remains effective in preventing starvation while 
+      preserving the distinction between high-priority and low-priority 
+      processes.
+    - By maintaining this differentiation, priority-based scheduling continues 
+      to function as intended rather than collapsing into a system where all 
+      processes are treated equally, regardless of their original priority.
+
+-------------------------------------------------------------------------------
+
+2. Adaptive Priority Boosting:
+    - Rather than using a fixed priority increment for every waiting process, 
+      the scheduler can adjust the rate of increase dynamically based on factors 
+      such as how long a process has been waiting or how many scheduling cycles 
+      it has been bypassed.
+    - A process that has only recently entered the ready queue would receive a 
+      smaller priority boost, ensuring that new low-priority tasks do not 
+      immediately overtake those with inherently higher priority.
+    - In contrast, processes that have been waiting for a longer duration would 
+      gain a larger priority increment, allowing them to catch up more quickly 
+      and reducing the likelihood of indefinite postponement.
+    - This method enhances overall fairness by ensuring that aging serves its 
+      purpose of preventing starvation while avoiding excessive priority jumps 
+      that might disrupt the natural order of scheduling.
+
+===============================================================================
